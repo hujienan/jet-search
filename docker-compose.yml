@@ -1,0 +1,34 @@
+version: '3.7'
+
+services: 
+  api:
+    container_name: search-api
+    build: .
+    ports: 
+      - "3000:3000"
+    environment: 
+      - PORT=3000
+      - ES_HOST=es
+    volumes: 
+      - ./books:/usr/src/app/books
+
+  frontend:
+    container_name: search-frontend
+    image: nginx
+    volumes: 
+      - ./public:/usr/share/nginx/html
+    ports: 
+      - "8080:80"
+
+  es:
+    image: elasticsearch:7.10.1
+    container_name: es
+    environment: 
+      - discovery.type=single-node
+    ports: 
+      - 9200:9200
+    volumes: 
+      - esdata:/usr/share/elasticsearch/data
+  
+volumes: 
+  esdata:

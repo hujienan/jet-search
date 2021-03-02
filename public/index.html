@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jet Search</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="search_container" class="container mx-auto ">
+        <h2 class="text-center text-blue-600 text-4xl ">Jet Search</h2>
+        <div class="w-4/5 mx-auto mt-8">
+            <input type="text" @input="search" v-model="term" class="w-1/2 block mx-auto text-center border-2 rounded border-blue-500 h-10 text-xl">
+            <p class="text-right">
+                {{ numOfHits }} found
+            </p>
+            <div>
+                <ol class="list-decimal">
+                    <li v-for="hit in hits" :key="hit._id" class="mb-4">
+                        <p><cite>{{ hit._source.title }}</cite> - {{ hit._source.author }}</p>
+                        <p>{{ hit._source.text }}</p>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: '#search_container',
+            data: {
+                term: "Hello World",
+                hits: [],
+                result: null,
+                searchOffset: 0,
+                numOfHits: 0,
+                baseUrl: 'http://localhost:3000'
+            },
+            methods: {
+                search: function () {
+                    let vm = this;
+                    axios.get(`${vm.baseUrl}/search`, {
+                        params: {
+                            term: vm.term,
+                            offset: vm.searchOffset
+                        }
+                    }).then(res => {
+                        vm.numOfHits = res.data.body.hits.total.value;
+                        vm.result = res.data.body.hits.hits;
+                        vm.hits = vm.result.slice(0, 5);
+                    })
+                }
+            },
+            mounted: function () {
+                this.search()
+            }
+        })
+    </script>
+</body>
+</html>
